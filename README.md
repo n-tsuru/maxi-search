@@ -1,4 +1,3 @@
-Certainly! Here's a suggestion for your `readme.md` file:
 
 # MakiMaxiSearch
 
