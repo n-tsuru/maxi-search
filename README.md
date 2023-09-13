@@ -2,6 +2,7 @@
 # MakiMaxiSearch
 
 Welcome to MakiMaxiSearch, a fast search command for Linux designed to handle large volumes of data with speed and efficiency.
+("MakiMaxiSearch" is pronounced "Mah-kee Mah-xee Search" in English. In Japanese, it is pronounced "まきまきサーチ")
 
 ## Description
 
