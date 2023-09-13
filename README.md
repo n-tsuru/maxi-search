@@ -8,6 +8,8 @@ Welcome to MakiMaxiSearch, a fast search command for Linux designed to handle la
 
 MakiMaxiSearch is a powerful search tool that is capable of searching through 100GB files in just one second, using only a 100MB index. It is specifically designed for engineers who need high-speed, efficient document search capabilities, especially for system logs. MakiMaxiSearch is not only incredibly fast, but also easy to use and integrate into your existing workflow.
 
+**This respository is on very early stage...**
+
 ## Features
 
 - **Fast**: Search 100GB files in just one second.
@@ -47,6 +49,10 @@ makimaxisearch system.log error
 ```
 
 This will search the `system.log` file for the term `error`.
+
+## TODO
+- write a matched chunk to STDOUT
+- LZ4 compression
 
 ## Contributing
 
