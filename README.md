@@ -12,8 +12,8 @@ MakiMaxiSearch is a powerful search tool that is capable of searching through 10
 
 ## Features
 
-- **Fast**: Search 100GB files in just one second.
-- **Efficient**: Uses only a 100MB index.
+- **Fast**: Search 100GB files in few seconds.
+- **Efficient**: Uses only a 200MB index for 100GB.
 - **Easy to Use**: Simple command-line interface.
 - **Versatile**: Ideal for searching system logs and other large documents.
 
