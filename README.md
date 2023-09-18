@@ -1,4 +1,4 @@
-![speed maki image](assets/fast_maki.jpg)
+![speed maki image](assets/fastmaki.jpg)
 # MakiMaxiSearch
 
 Welcome to MakiMaxiSearch, a fast search command for Linux designed to handle large volumes of data with speed and efficiency.
