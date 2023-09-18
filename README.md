@@ -27,32 +27,57 @@ git clone https://github.com/yourusername/MakiMaxiSearch.git
 ```
 2. Navigate to the project folder:
 ```
-cd MakiMaxiSearch
+cd maxi-search
 ```
 3. Compile the project:
 ```
-make
+cargo build --release
+```
+
+4. Install
+```
+sudo mv target/release/mmsearch /usr/local/bin
 ```
 
 ## Usage
 
-To use MakiMaxiSearch, simply run the command followed by the file you want to search and the query:
+To use MakiMaxiSearch, create an index of target file and query
+
+1. create index
+Run mmsearch like below:
+```
+mmsearch --file TARGET_FILE --create
+```
+This creates default index file "index.dat" at current directory.
+
+2. search
+At same directory, run it
+```
+mmsearch --file TARGET_FILE --query "STRING"
+```
+Then mmsearch write corresnponding chunk to stdout. This is very probablistic because mmsearch only checks if triplets of given STRING exits. So, usually you should run with grep or other tools like.
+```
+mmsearch --file TARGET_FILE --query "STRING" | grep "STRING"
+```
+3. Here is full options of mmsearch
 
 ```
-makimaxisearch [file] [query]
-```
+Usage: mmsearch [OPTIONS] --file <FILE>
 
-For example:
-
+Options:
+  -f, --file <FILE>    target file
+  -i, --index <INDEX>  index file [default: index.dat]
+  -c, --chunk <CHUNK>  chunk size should be 2^N [default: 4M] [possible values: 4M, 8M, 16M]
+  -l, --log <LOG>      Set the logging level. Options: [error, warn, info, debug, trace] [default: info] [possible values: debug, info, warn]
+  -q, --query <QUERY>  query string
+  -C, --create         create index
+  -h, --help           Print help
+  -V, --version        Print version
 ```
-makimaxisearch system.log error
-```
-
-This will search the `system.log` file for the term `error`.
 
 ## TODO
-- write a matched chunk to STDOUT
 - LZ4 compression
+- string match function
 
 ## Contributing
 
