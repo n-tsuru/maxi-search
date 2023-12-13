@@ -1,3 +1,4 @@
+use std::process;
 use std::fs::File;
 use std::io::{Read, Write, self, Error};
 // file operation for search
@@ -11,6 +12,8 @@ use std::mem;
 use rkyv::Deserialize;
 
 use crate::index::{ListofIndex,hash_3_to_2};
+use lz4_flex::block::{decompress_into, get_maximum_output_size};
+
 
 // generate query vector
 fn fill_query(query_string:String) -> Vec<u64> {
@@ -74,6 +77,7 @@ fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:String,chunk
     let num_of_index = deserialized.n;
     
     let mut file_buf:Vec<u8> = vec![0;chunk_size];
+    let mut expand_buf:Vec<u8> = vec![0;get_maximum_output_size(chunk_size)];
     let mut ith_index = 0;
     for ielm in deserialized.indexies.iter() {
         log::debug!("ielm offset = {}",ielm.offset);
@@ -82,6 +86,7 @@ fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:String,chunk
             log::info!("matched!");
             let mut nread = 0;
             let mut remain = ielm.compress_size as usize;
+            let mut rcount: usize = 0;
             let mut read_pos:usize = 0;
             let mut offset = ielm.offset as i64;
 
@@ -98,16 +103,23 @@ fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:String,chunk
                     0 => { break },
                     _ => {
                         remain -= nread as usize;
+                        rcount += nread as usize;
                         offset += nread as i64;
                         read_pos += nread as usize;
                     }
                 };
             };
 
-            io::stdout().write_all(&file_buf)?;
-            // extract_chunk(file,buff);
-            // do_query();
+            match decompress_into(&file_buf[0..rcount], &mut expand_buf) {
+                Err(e) =>    { log::error!("an error at file:{} line:{} ,msg:{}",file!(),line!(), e); process::exit(1); },
+                _ => {
+                    // write string query code and output to STDOUT
+                    //target.write_all(&expand_buf[0..(ielm.original_size as usize)])?;
+                    //io::stdout().write_all(&file_buf)?;
+                },
+            };
         };
+        
 
         ith_index+=1;
         log::info!("ith index match = {}",ith_index);
