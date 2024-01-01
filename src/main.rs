@@ -12,6 +12,7 @@ use simple_logger::SimpleLogger;
 
 // args
 use clap::{arg, command, value_parser};
+use std::os::fd::AsRawFd;
 use std::path::PathBuf;
 
 // file operation for create index
@@ -102,7 +103,15 @@ fn main() -> std::io::Result<()> {
             let mut source = fs::File::open(source_path)?;
             create_files(&mut source,&mut target,&mut index, chunk_size)?;
         },
-        Some("search") => {},
+        Some("search") => {
+            let subcommand = matches.subcommand_matches("search").unwrap();
+            
+            let file_path = subcommand.get_one::<PathBuf>("file").unwrap();
+            let query =  subcommand.get_one::<String>("query").unwrap();
+            let mut index = fs::File::open(index_path)?;
+            let mut file = fs::File::open(file_path)?;
+            query::query(file.as_raw_fd(), &mut index, &query.to_string(), chunk_size)?;
+        },
         Some("expand") => {
             let subcommand = matches.subcommand_matches("expand").unwrap();
             let target_path = subcommand.get_one::<PathBuf>("target").unwrap();

@@ -16,9 +16,9 @@ use lz4_flex::block::{decompress_into, get_maximum_output_size};
 
 
 // generate query vector
-fn fill_query(query_string:String) -> Vec<u64> {
+fn fill_query(query_string:&String) -> Vec<u64> {
     let mut bits:Vec::<bool> = vec![false;65536];
-    let query_bytes = query_string.into_bytes();
+    let query_bytes = query_string.as_bytes();
     let iter = query_bytes.windows(3);
 
     iter.for_each(|s| {
@@ -38,7 +38,7 @@ fn fill_query(query_string:String) -> Vec<u64> {
     log::debug!("bits_compact_len = {}, u64 size = {}", bits_compact.len(), bits_compact.len()/8);
     log::debug!("bits_compact = {:x?}",bits_compact);
 
-    let mut u64_vec = vec![0;bits_compact.len() / 8];
+    let mut u64_vec = Vec::new();
     for chunk in bits_compact.chunks_exact(8) {
         log::debug!("chunk = {:x?}",chunk);
         let arr_ref: &[u8; 8] = &chunk.try_into().expect("Failed to convert slice into array");
@@ -52,6 +52,7 @@ fn fill_query(query_string:String) -> Vec<u64> {
 
 // check matching
 fn match_query(query:&Vec<u64>,index:&[u64]) -> bool {
+    log::debug!("len query={}, len index={}", query.len(), index.len());
     for (q,i) in query.iter().zip(index.iter()) {
         if *q==0 { continue; };
         if (*q & *i)==*q { continue;};
@@ -61,18 +62,21 @@ fn match_query(query:&Vec<u64>,index:&[u64]) -> bool {
 }
 
 // query
-fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:String,chunk_size:usize) -> std::io::Result<()> {
+pub fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:&String,chunk_size:usize) -> std::io::Result<()> {
     // read index
     let mut index_buff_u8: Vec<u8> = Vec::new();
+    let mut read_buff: Vec<u8> = vec![0;chunk_size]; // source reading chunk buffer
+    let mut expand_buffer:Vec<u8> = vec![0;get_maximum_output_size(chunk_size)];
     let read_to_end_ret =index.read_to_end(&mut index_buff_u8);
     log::info!("read_to_end_ret: {:?}", read_to_end_ret);
 
     let archived = unsafe { rkyv::archived_root::<ListofIndex>(&index_buff_u8[..]) };
+    log::debug!("unsafe rkyv finished");
     let deserialized: ListofIndex = archived.deserialize(&mut rkyv::Infallible).unwrap();
     log::debug!("deserialize len = {}", deserialized.n);
 
     let query = fill_query(query_string);
-    log::debug!("fill_query = {:?}",query);
+    log::debug!("fill_query = {:x?}",query);
 
     let num_of_index = deserialized.n;
     
@@ -81,7 +85,10 @@ fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:String,chunk
     let mut ith_index = 0;
     for ielm in deserialized.indexies.iter() {
         log::debug!("ielm offset = {}",ielm.offset);
-
+        log::debug!("ielm.hash = {:x?}",ielm.hash);
+        log::info!("query string = {}",&query_string);
+        log::debug!("query = {:x?}",query);
+        
         if match_query(&query,&ielm.hash) {
             log::info!("matched!");
             let mut nread = 0;
