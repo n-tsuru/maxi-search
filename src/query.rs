@@ -122,7 +122,7 @@ pub fn query(file_fd:std::os::fd::RawFd, index: &mut File, query_string:&String,
                 _ => {
                     // write string query code and output to STDOUT
                     //target.write_all(&expand_buf[0..(ielm.original_size as usize)])?;
-                    //io::stdout().write_all(&file_buf)?;
+                    io::stdout().write_all(&expand_buf)?;
                 },
             };
         };

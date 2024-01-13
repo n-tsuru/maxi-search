@@ -2,6 +2,7 @@ mod create_files;
 mod expand_files;
 mod query;
 mod index;
+mod glob;
 
 use create_files::create_files;
 use expand_files::expand_file;
